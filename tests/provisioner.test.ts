@@ -14,11 +14,11 @@ function createMockLogger(): Logger {
 
 function createMockClient() {
   return {
-    workspaceMemberUpdate: mock(() => Promise.resolve({ workspaceMemberUpdate: true })),
+    workspaceMemberUpdate: mock(() => Promise.resolve({ workspaceMemberUpdate: { id: "m-1", email: "john.doe@example.com", role: "VIEWER" } })),
     projectCreate: mock(() =>
       Promise.resolve({ projectCreate: { id: "proj-123", name: "john-doe" } }),
     ),
-    projectMemberUpdate: mock(() => Promise.resolve({ projectMemberUpdate: true })),
+    projectMemberAdd: mock(() => Promise.resolve({ projectMemberAdd: { id: "pm-1", email: "john.doe@example.com", role: "ADMIN" } })),
     query: mock(() => Promise.resolve({})),
   };
 }
@@ -46,7 +46,7 @@ describe("Provisioner", () => {
 
     expect(client.workspaceMemberUpdate).toHaveBeenCalledWith("ws-123", "user-1", "VIEWER");
     expect(client.projectCreate).toHaveBeenCalledWith("john-doe", "ws-123");
-    expect(client.projectMemberUpdate).toHaveBeenCalledWith("proj-123", "user-1", "ADMIN");
+    expect(client.projectMemberAdd).toHaveBeenCalledWith("proj-123", "user-1", "ADMIN");
 
     expect(result).toEqual({
       userId: "user-1",
@@ -75,7 +75,7 @@ describe("Provisioner", () => {
     const result = await provisioner.provision("user-1", "john.doe@example.com", "ws-123");
 
     expect(result.projectId).toBe("existing-proj");
-    expect(client.projectMemberUpdate).toHaveBeenCalledWith("existing-proj", "user-1", "ADMIN");
+    expect(client.projectMemberAdd).toHaveBeenCalledWith("existing-proj", "user-1", "ADMIN");
   });
 
   test("throws on non-duplicate project creation errors", async () => {

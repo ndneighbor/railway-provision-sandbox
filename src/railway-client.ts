@@ -131,21 +131,29 @@ export class RailwayClient {
   async workspaceMemberUpdate(workspaceId: string, userId: string, role: WorkspaceRole) {
     const gql = `
       mutation workspaceMemberUpdate($input: WorkspaceMemberUpdateInput!) {
-        workspaceMemberUpdate(input: $input)
+        workspaceMemberUpdate(input: $input) {
+          id
+          email
+          role
+        }
       }
     `;
-    return this.query<{ workspaceMemberUpdate: boolean }>(gql, {
+    return this.query<{ workspaceMemberUpdate: { id: string; email: string; role: string } }>(gql, {
       input: { workspaceId, userId, role },
     });
   }
 
-  async projectMemberUpdate(projectId: string, userId: string, role: ProjectRole) {
+  async projectMemberAdd(projectId: string, userId: string, role: ProjectRole) {
     const gql = `
-      mutation projectMemberUpdate($input: ProjectMemberUpdateInput!) {
-        projectMemberUpdate(input: $input)
+      mutation projectMemberAdd($input: ProjectMemberAddInput!) {
+        projectMemberAdd(input: $input) {
+          id
+          email
+          role
+        }
       }
     `;
-    return this.query<{ projectMemberUpdate: boolean }>(gql, {
+    return this.query<{ projectMemberAdd: { id: string; email: string; role: string } }>(gql, {
       input: { projectId, userId, role },
     });
   }

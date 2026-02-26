@@ -35,7 +35,7 @@ export class Provisioner {
 
     // Step 3: Grant user ADMIN on project
     this.logger.info("Granting ADMIN on project", { userId, projectId });
-    await this.client.projectMemberUpdate(projectId, userId, "ADMIN");
+    await this.client.projectMemberAdd(projectId, userId, "ADMIN");
 
     const result: ProvisioningResult = {
       userId,
