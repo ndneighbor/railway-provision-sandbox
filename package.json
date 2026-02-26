@@ -1,0 +1,13 @@
+{
+  "name": "railway-provision-sandbox",
+  "version": "1.0.0",
+  "description": "Automated workspace member onboarding — provisions sandboxed projects for new members",
+  "scripts": {
+    "start": "bun src/index.ts",
+    "dev": "bun --hot src/index.ts",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
