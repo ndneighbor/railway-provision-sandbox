@@ -45,14 +45,14 @@ describe("Provisioner", () => {
     const result = await provisioner.provision("user-1", "john.doe@example.com", "ws-123");
 
     expect(client.workspaceMemberUpdate).toHaveBeenCalledWith("ws-123", "user-1", "VIEWER");
-    expect(client.projectCreate).toHaveBeenCalledWith("john-doe", "ws-123");
+    expect(client.projectCreate).toHaveBeenCalledWith("john-doe-user-1", "ws-123");
     expect(client.projectMemberAdd).toHaveBeenCalledWith("proj-123", "user-1", "ADMIN");
 
     expect(result).toEqual({
       userId: "user-1",
       email: "john.doe@example.com",
       projectId: "proj-123",
-      projectName: "john-doe",
+      projectName: "john-doe-user-1",
       workspaceRole: "VIEWER",
       projectRole: "ADMIN",
     });
@@ -66,7 +66,7 @@ describe("Provisioner", () => {
       Promise.resolve({
         workspace: {
           projects: {
-            edges: [{ node: { id: "existing-proj", name: "john-doe" } }],
+            edges: [{ node: { id: "existing-proj", name: "john-doe-user-1" } }],
           },
         },
       }),
@@ -88,25 +88,39 @@ describe("Provisioner", () => {
     ).rejects.toThrow("Unauthorized");
   });
 
+  test("handles replay when user already a project member", async () => {
+    client.projectMemberAdd = mock(() => {
+      throw new RailwayAPIError("Member already exists");
+    });
+
+    const result = await provisioner.provision("user-1", "john.doe@example.com", "ws-123");
+
+    expect(result.projectId).toBe("proj-123");
+  });
+
   describe("deriveProjectName", () => {
     test("simple email", () => {
-      expect(provisioner.deriveProjectName("john@example.com")).toBe("john");
+      expect(provisioner.deriveProjectName("john@example.com", "abc123")).toBe("john-abc123");
     });
 
     test("dotted email", () => {
-      expect(provisioner.deriveProjectName("john.doe@example.com")).toBe("john-doe");
+      expect(provisioner.deriveProjectName("john.doe@example.com", "abc123")).toBe("john-doe-abc123");
     });
 
     test("email with special characters", () => {
-      expect(provisioner.deriveProjectName("John_Doe+test@example.com")).toBe("john-doe-test");
+      expect(provisioner.deriveProjectName("John_Doe+test@example.com", "abc123")).toBe("john-doe-test-abc123");
     });
 
     test("email with consecutive special chars", () => {
-      expect(provisioner.deriveProjectName("john..doe@example.com")).toBe("john-doe");
+      expect(provisioner.deriveProjectName("john..doe@example.com", "abc123")).toBe("john-doe-abc123");
     });
 
     test("email with leading/trailing special chars", () => {
-      expect(provisioner.deriveProjectName(".john.@example.com")).toBe("john");
+      expect(provisioner.deriveProjectName(".john.@example.com", "abc123")).toBe("john-abc123");
+    });
+
+    test("uses last 6 chars of userId as suffix", () => {
+      expect(provisioner.deriveProjectName("john@example.com", "user-abcdef123456")).toBe("john-123456");
     });
   });
 });

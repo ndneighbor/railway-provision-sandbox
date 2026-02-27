@@ -17,7 +17,7 @@ export class Provisioner {
     await this.client.workspaceMemberUpdate(workspaceId, userId, "VIEWER");
 
     // Step 2: Create project for user
-    const projectName = this.deriveProjectName(email);
+    const projectName = this.deriveProjectName(email, userId);
     this.logger.info("Creating project", { projectName });
 
     let projectId: string;
@@ -35,7 +35,15 @@ export class Provisioner {
 
     // Step 3: Grant user ADMIN on project
     this.logger.info("Granting ADMIN on project", { userId, projectId });
-    await this.client.projectMemberAdd(projectId, userId, "ADMIN");
+    try {
+      await this.client.projectMemberAdd(projectId, userId, "ADMIN");
+    } catch (err) {
+      if (err instanceof RailwayAPIError && this.isMemberAlreadyExistsError(err)) {
+        this.logger.warn("User already a project member, skipping add", { userId, projectId });
+      } else {
+        throw err;
+      }
+    }
 
     const result: ProvisioningResult = {
       userId,
@@ -50,18 +58,25 @@ export class Provisioner {
     return result;
   }
 
-  deriveProjectName(email: string): string {
+  deriveProjectName(email: string, userId: string): string {
     const prefix = email.split("@")[0];
-    return prefix
+    const sanitized = prefix
       .toLowerCase()
       .replace(/[^a-z0-9-]/g, "-")
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "");
+    const suffix = userId.slice(-6);
+    return `${sanitized}-${suffix}`;
   }
 
   private isDuplicateProjectError(err: RailwayAPIError): boolean {
     const msg = err.message.toLowerCase();
     return msg.includes("duplicate") || msg.includes("already exists") || msg.includes("unique");
+  }
+
+  private isMemberAlreadyExistsError(err: RailwayAPIError): boolean {
+    const msg = err.message.toLowerCase();
+    return msg.includes("already") || msg.includes("exists") || msg.includes("duplicate");
   }
 
   private async findExistingProject(name: string, workspaceId: string): Promise<string> {
