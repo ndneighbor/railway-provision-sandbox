@@ -12,11 +12,7 @@ export class Provisioner {
   async provision(userId: string, email: string, workspaceId: string): Promise<ProvisioningResult> {
     this.logger.info("Starting provisioning", { userId, email, workspaceId });
 
-    // Step 1: Set member to VIEWER
-    this.logger.info("Setting workspace member to VIEWER", { userId });
-    await this.client.workspaceMemberUpdate(workspaceId, userId, "VIEWER");
-
-    // Step 2: Create project for user
+    // Step 1: Create project for user
     const projectName = this.deriveProjectName(email, userId);
     this.logger.info("Creating project", { projectName });
 
@@ -33,7 +29,7 @@ export class Provisioner {
       }
     }
 
-    // Step 3: Grant user ADMIN on project
+    // Step 2: Grant user ADMIN on project
     this.logger.info("Granting ADMIN on project", { userId, projectId });
     try {
       await this.client.projectMemberAdd(projectId, userId, "ADMIN");

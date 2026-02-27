@@ -14,7 +14,6 @@ function createMockLogger(): Logger {
 
 function createMockClient() {
   return {
-    workspaceMemberUpdate: mock(() => Promise.resolve({ workspaceMemberUpdate: { id: "m-1", email: "john.doe@example.com", role: "VIEWER" } })),
     projectCreate: mock(() =>
       Promise.resolve({ projectCreate: { id: "proj-123", name: "john-doe" } }),
     ),
@@ -44,7 +43,6 @@ describe("Provisioner", () => {
   test("full provisioning workflow succeeds", async () => {
     const result = await provisioner.provision("user-1", "john.doe@example.com", "ws-123");
 
-    expect(client.workspaceMemberUpdate).toHaveBeenCalledWith("ws-123", "user-1", "VIEWER");
     expect(client.projectCreate).toHaveBeenCalledWith("john-doe-user-1", "ws-123");
     expect(client.projectMemberAdd).toHaveBeenCalledWith("proj-123", "user-1", "ADMIN");
 

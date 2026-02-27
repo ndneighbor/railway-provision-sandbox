@@ -1,4 +1,4 @@
-import type { GraphQLResponse, Logger, WorkspaceRole, ProjectRole } from "./types";
+import type { GraphQLResponse, Logger, ProjectRole } from "./types";
 
 export class RailwayAPIError extends Error {
   constructor(
@@ -125,21 +125,6 @@ export class RailwayClient {
     `;
     return this.query<{ projectCreate: { id: string; name: string } }>(gql, {
       input: { name, workspaceId },
-    });
-  }
-
-  async workspaceMemberUpdate(workspaceId: string, userId: string, role: WorkspaceRole) {
-    const gql = `
-      mutation workspaceMemberUpdate($input: WorkspaceMemberUpdateInput!) {
-        workspaceMemberUpdate(input: $input) {
-          id
-          email
-          role
-        }
-      }
-    `;
-    return this.query<{ workspaceMemberUpdate: { id: string; email: string; role: string } }>(gql, {
-      input: { workspaceId, userId, role },
     });
   }
 
