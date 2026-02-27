@@ -159,6 +159,15 @@ export class RailwayClient {
     return this.query<{ notificationRules: NotificationRule[] }>(gql, { workspaceId });
   }
 
+  async notificationRuleDelete(ruleId: string) {
+    const gql = `
+      mutation notificationRuleDelete($id: String!) {
+        notificationRuleDelete(id: $id)
+      }
+    `;
+    return this.query<{ notificationRuleDelete: boolean }>(gql, { id: ruleId });
+  }
+
   async notificationRuleCreate(workspaceId: string, webhookUrl: string, webhookSecret?: string) {
     const gql = `
       mutation notificationRuleCreate($input: NotificationRuleCreateInput!) {
