@@ -1,4 +1,4 @@
-import type { GraphQLResponse, Logger, ProjectRole } from "./types";
+import type { GraphQLResponse, Logger, NotificationRule, ProjectRole } from "./types";
 
 export class RailwayAPIError extends Error {
   constructor(
@@ -140,6 +140,44 @@ export class RailwayClient {
     `;
     return this.query<{ projectMemberAdd: { id: string; email: string; role: string } }>(gql, {
       input: { projectId, userId, role },
+    });
+  }
+
+  async getNotificationRules(workspaceId: string) {
+    const gql = `
+      query notificationRules($workspaceId: String!) {
+        notificationRules(workspaceId: $workspaceId) {
+          id
+          eventTypes
+          channelConfigs {
+            type
+            webhookUrl
+          }
+        }
+      }
+    `;
+    return this.query<{ notificationRules: NotificationRule[] }>(gql, { workspaceId });
+  }
+
+  async notificationRuleCreate(workspaceId: string, webhookUrl: string) {
+    const gql = `
+      mutation notificationRuleCreate($input: NotificationRuleCreateInput!) {
+        notificationRuleCreate(input: $input) {
+          id
+          eventTypes
+          channelConfigs {
+            type
+            webhookUrl
+          }
+        }
+      }
+    `;
+    return this.query<{ notificationRuleCreate: NotificationRule }>(gql, {
+      input: {
+        workspaceId,
+        eventTypes: ["WorkspaceMember.joined"],
+        channelConfigs: [{ type: "webhook", webhookUrl }],
+      },
     });
   }
 }

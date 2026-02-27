@@ -42,6 +42,16 @@ export interface Config {
   port: number;
   logLevel: string;
   webhookSecret?: string;
+  publicDomain?: string;
+}
+
+export interface NotificationRule {
+  id: string;
+  eventTypes: string[];
+  channelConfigs: Array<{
+    type: string;
+    webhookUrl?: string;
+  }>;
 }
 
 export interface Logger {

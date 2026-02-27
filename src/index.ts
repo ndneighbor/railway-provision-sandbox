@@ -2,6 +2,7 @@ import { loadConfig } from "./config";
 import { createLogger } from "./logger";
 import { RailwayClient } from "./railway-client";
 import { Provisioner } from "./services/provisioner";
+import { NotificationSetup } from "./services/notification-setup";
 import { WebhookHandler } from "./handlers/webhook";
 
 const config = loadConfig();
@@ -25,6 +26,13 @@ const server = Bun.serve({
 });
 
 logger.info("Server started", { port: server.port });
+
+const notificationSetup = new NotificationSetup(client, config, logger);
+notificationSetup.ensureNotificationRule().catch((err) => {
+  logger.error("Failed to set up notification rule", {
+    error: (err as Error).message,
+  });
+});
 
 process.on("SIGTERM", () => {
   logger.info("SIGTERM received, shutting down");
