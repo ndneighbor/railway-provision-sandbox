@@ -48,7 +48,7 @@ export interface Config {
 export interface NotificationRule {
   id: string;
   eventTypes: string[];
-  channelConfigs: Array<{
+  channels: Array<{
     type: string;
     webhookUrl?: string;
   }>;

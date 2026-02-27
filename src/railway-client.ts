@@ -149,7 +149,7 @@ export class RailwayClient {
         notificationRules(workspaceId: $workspaceId) {
           id
           eventTypes
-          channelConfigs {
+          channels {
             type
             webhookUrl
           }
@@ -174,7 +174,7 @@ export class RailwayClient {
         notificationRuleCreate(input: $input) {
           id
           eventTypes
-          channelConfigs {
+          channels {
             type
             webhookUrl
           }
@@ -189,7 +189,7 @@ export class RailwayClient {
       input: {
         workspaceId,
         eventTypes: ["WorkspaceMember.joined"],
-        channelConfigs: [channelConfig],
+        channels: [channelConfig],
       },
     });
   }

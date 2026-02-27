@@ -14,13 +14,13 @@ function createMockLogger(): Logger {
 const existingRule: NotificationRule = {
   id: "rule-123",
   eventTypes: ["WorkspaceMember.joined"],
-  channelConfigs: [{ type: "webhook", webhookUrl: "https://my-app.up.railway.app/webhook" }],
+  channels: [{ type: "webhook", webhookUrl: "https://my-app.up.railway.app/webhook" }],
 };
 
 const recreatedRule: NotificationRule = {
   id: "rule-456",
   eventTypes: ["WorkspaceMember.joined"],
-  channelConfigs: [{ type: "webhook", webhookUrl: "https://my-app.up.railway.app/webhook" }],
+  channels: [{ type: "webhook", webhookUrl: "https://my-app.up.railway.app/webhook" }],
 };
 
 function createMockClient() {
@@ -123,7 +123,7 @@ describe("NotificationSetup", () => {
           {
             id: "rule-other",
             eventTypes: ["WorkspaceMember.joined"],
-            channelConfigs: [{ type: "webhook", webhookUrl: "https://other.app/webhook" }],
+            channels: [{ type: "webhook", webhookUrl: "https://other.app/webhook" }],
           },
         ],
       }),
@@ -143,7 +143,7 @@ describe("NotificationSetup", () => {
           {
             id: "rule-other",
             eventTypes: ["WorkspaceMember.removed"],
-            channelConfigs: [{ type: "webhook", webhookUrl: "https://my-app.up.railway.app/webhook" }],
+            channels: [{ type: "webhook", webhookUrl: "https://my-app.up.railway.app/webhook" }],
           },
         ],
       }),
