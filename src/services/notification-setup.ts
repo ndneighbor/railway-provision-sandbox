@@ -27,10 +27,14 @@ export class NotificationSetup {
       return existing;
     }
 
-    this.logger.info("Creating notification rule", { webhookUrl });
+    this.logger.info("Creating notification rule", {
+      webhookUrl,
+      signed: !!this.config.webhookSecret,
+    });
     const result = await this.client.notificationRuleCreate(
       this.config.workspaceId,
       webhookUrl,
+      this.config.webhookSecret,
     );
     this.logger.info("Notification rule created", {
       ruleId: result.notificationRuleCreate.id,

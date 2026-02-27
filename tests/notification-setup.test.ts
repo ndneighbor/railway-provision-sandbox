@@ -54,8 +54,22 @@ describe("NotificationSetup", () => {
     expect(client.notificationRuleCreate).toHaveBeenCalledWith(
       "ws-123",
       "https://my-app.up.railway.app/webhook",
+      undefined,
     );
     expect(result).toEqual(existingRule);
+  });
+
+  test("passes webhook secret when configured", async () => {
+    const configWithSecret: Config = { ...baseConfig, webhookSecret: "s3cret" };
+    setup = new NotificationSetup(client as any, configWithSecret, logger);
+
+    await setup.ensureNotificationRule();
+
+    expect(client.notificationRuleCreate).toHaveBeenCalledWith(
+      "ws-123",
+      "https://my-app.up.railway.app/webhook",
+      "s3cret",
+    );
   });
 
   test("skips creation when matching rule already exists", async () => {

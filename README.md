@@ -36,18 +36,20 @@ WorkspaceMember.joined webhook
 |---|---|---|
 | `RAILWAY_API_TOKEN` | Yes | API token with workspace admin permissions |
 | `WORKSPACE_ID` | Yes | The workspace to provision projects in |
-| `WEBHOOK_SECRET` | No | HMAC secret for verifying webhook signatures |
+| `WEBHOOK_SECRET` | No | HMAC secret for verifying webhook signatures (recommended) |
 | `PORT` | No | Server port (default: 3000) |
 | `LOG_LEVEL` | No | `debug`, `info`, `warn`, or `error` (default: `info`) |
+
+`RAILWAY_PUBLIC_DOMAIN` is automatically set by Railway when the service has a public domain.
 
 ### Deploy to Railway
 
 1. Deploy this repo to your workspace
-2. Set the environment variables above
-3. Create a notification rule in your workspace:
-   - Event: `WorkspaceMember.joined`
-   - Destination: Webhook → `https://<your-service-url>/webhook`
+2. Set the environment variables above (set `WEBHOOK_SECRET` to a random string to secure the endpoint)
+3. The service auto-creates its notification rule on startup — no manual dashboard config needed
 4. New members joining via SSO/Trusted Domains will be automatically provisioned
+
+When `WEBHOOK_SECRET` is set, the service passes it to Railway when creating the notification rule and verifies the `x-webhook-signature` HMAC-SHA256 header on every incoming request. Unsigned requests are rejected with 401.
 
 ### Run Locally
 

@@ -159,7 +159,7 @@ export class RailwayClient {
     return this.query<{ notificationRules: NotificationRule[] }>(gql, { workspaceId });
   }
 
-  async notificationRuleCreate(workspaceId: string, webhookUrl: string) {
+  async notificationRuleCreate(workspaceId: string, webhookUrl: string, webhookSecret?: string) {
     const gql = `
       mutation notificationRuleCreate($input: NotificationRuleCreateInput!) {
         notificationRuleCreate(input: $input) {
@@ -172,11 +172,15 @@ export class RailwayClient {
         }
       }
     `;
+    const channelConfig: Record<string, string> = { type: "webhook", webhookUrl };
+    if (webhookSecret) {
+      channelConfig.webhookSecret = webhookSecret;
+    }
     return this.query<{ notificationRuleCreate: NotificationRule }>(gql, {
       input: {
         workspaceId,
         eventTypes: ["WorkspaceMember.joined"],
-        channelConfigs: [{ type: "webhook", webhookUrl }],
+        channelConfigs: [channelConfig],
       },
     });
   }
