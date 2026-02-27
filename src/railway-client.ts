@@ -83,7 +83,7 @@ export class RailwayClient {
   async getWorkspaceMembers(workspaceId: string) {
     const gql = `
       query workspaceMembers($workspaceId: String!) {
-        workspace(id: $workspaceId) {
+        workspace(workspaceId: $workspaceId) {
           members {
             edges {
               node {
@@ -124,7 +124,7 @@ export class RailwayClient {
       }
     `;
     return this.query<{ projectCreate: { id: string; name: string } }>(gql, {
-      input: { name, teamId: workspaceId },
+      input: { name, workspaceId },
     });
   }
 

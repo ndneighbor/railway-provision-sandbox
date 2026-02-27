@@ -3,8 +3,16 @@ export interface WebhookPayload {
   details: {
     userId: string;
     email: string;
-    workspaceId: string;
+    role: string;
   };
+  resource: {
+    workspace: {
+      id: string;
+      name: string;
+    };
+  };
+  severity?: string;
+  timestamp?: string;
 }
 
 export type WorkspaceRole = "VIEWER" | "MEMBER" | "ADMIN";

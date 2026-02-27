@@ -138,7 +138,7 @@ describe("RailwayClient", () => {
     await client.projectCreate("my-project", "ws-123");
     expect(capturedBody.variables.input).toEqual({
       name: "my-project",
-      teamId: "ws-123",
+      workspaceId: "ws-123",
     });
   });
 });

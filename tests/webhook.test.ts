@@ -33,6 +33,26 @@ const mockConfig: Config = {
   logLevel: "info",
 };
 
+function validPayload(overrides?: Record<string, unknown>) {
+  return {
+    type: "WorkspaceMember.joined",
+    details: {
+      userId: "user-1",
+      email: "john@example.com",
+      role: "VIEWER",
+    },
+    resource: {
+      workspace: {
+        id: "ws-123",
+        name: "Test Workspace",
+      },
+    },
+    severity: "INFO",
+    timestamp: "2026-02-27T06:38:35.493Z",
+    ...overrides,
+  };
+}
+
 describe("WebhookHandler", () => {
   let provisioner: ReturnType<typeof createMockProvisioner>;
   let logger: Logger;
@@ -48,14 +68,7 @@ describe("WebhookHandler", () => {
     const req = new Request("http://localhost/webhook", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "WorkspaceMember.joined",
-        details: {
-          userId: "user-1",
-          email: "john@example.com",
-          workspaceId: "ws-123",
-        },
-      }),
+      body: JSON.stringify(validPayload()),
     });
 
     const res = await handler.handleWebhook(req);
@@ -71,14 +84,7 @@ describe("WebhookHandler", () => {
     const req = new Request("http://localhost/webhook", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "WorkspaceMember.removed",
-        details: {
-          userId: "user-1",
-          email: "john@example.com",
-          workspaceId: "ws-123",
-        },
-      }),
+      body: JSON.stringify(validPayload({ type: "WorkspaceMember.removed" })),
     });
 
     const res = await handler.handleWebhook(req);
@@ -110,6 +116,20 @@ describe("WebhookHandler", () => {
     expect(res.status).toBe(400);
   });
 
+  test("rejects payload missing resource.workspace", async () => {
+    const req = new Request("http://localhost/webhook", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        type: "WorkspaceMember.joined",
+        details: { userId: "u1", email: "a@b.com", role: "VIEWER" },
+      }),
+    });
+
+    const res = await handler.handleWebhook(req);
+    expect(res.status).toBe(400);
+  });
+
   test("rejects invalid payload details", async () => {
     const req = new Request("http://localhost/webhook", {
       method: "POST",
@@ -117,6 +137,7 @@ describe("WebhookHandler", () => {
       body: JSON.stringify({
         type: "WorkspaceMember.joined",
         details: { userId: 123 },
+        resource: { workspace: { id: "ws-1", name: "Test" } },
       }),
     });
 
@@ -130,14 +151,7 @@ describe("WebhookHandler", () => {
     const req = new Request("http://localhost/webhook", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        type: "WorkspaceMember.joined",
-        details: {
-          userId: "user-1",
-          email: "john@example.com",
-          workspaceId: "ws-123",
-        },
-      }),
+      body: JSON.stringify(validPayload()),
     });
 
     const res = await handler.handleWebhook(req);
@@ -158,14 +172,7 @@ describe("WebhookHandler", () => {
           "Content-Type": "application/json",
           "x-webhook-signature": "invalid-sig",
         },
-        body: JSON.stringify({
-          type: "WorkspaceMember.joined",
-          details: {
-            userId: "user-1",
-            email: "john@example.com",
-            workspaceId: "ws-123",
-          },
-        }),
+        body: JSON.stringify(validPayload()),
       });
 
       const res = await handler.handleWebhook(req);
@@ -177,16 +184,8 @@ describe("WebhookHandler", () => {
       const configWithSecret: Config = { ...mockConfig, webhookSecret: secret };
       handler = new WebhookHandler(provisioner as any, configWithSecret, logger);
 
-      const body = JSON.stringify({
-        type: "WorkspaceMember.joined",
-        details: {
-          userId: "user-1",
-          email: "john@example.com",
-          workspaceId: "ws-123",
-        },
-      });
+      const body = JSON.stringify(validPayload());
 
-      // Compute valid signature
       const encoder = new TextEncoder();
       const key = await crypto.subtle.importKey(
         "raw",
@@ -214,12 +213,7 @@ describe("WebhookHandler", () => {
 
   describe("validatePayload", () => {
     test("accepts valid payload", () => {
-      expect(
-        handler.validatePayload({
-          type: "WorkspaceMember.joined",
-          details: { userId: "u1", email: "a@b.com", workspaceId: "ws-1" },
-        }),
-      ).toBe(true);
+      expect(handler.validatePayload(validPayload())).toBe(true);
     });
 
     test("rejects null", () => {
@@ -227,15 +221,16 @@ describe("WebhookHandler", () => {
     });
 
     test("rejects missing type", () => {
-      expect(
-        handler.validatePayload({
-          details: { userId: "u1", email: "a@b.com", workspaceId: "ws-1" },
-        }),
-      ).toBe(false);
+      const { type, ...rest } = validPayload();
+      expect(handler.validatePayload(rest)).toBe(false);
     });
 
     test("rejects missing details", () => {
-      expect(handler.validatePayload({ type: "test" })).toBe(false);
+      expect(handler.validatePayload({ type: "test", resource: { workspace: { id: "ws-1", name: "T" } } })).toBe(false);
+    });
+
+    test("rejects missing resource", () => {
+      expect(handler.validatePayload({ type: "test", details: { userId: "u1", email: "a@b.com" } })).toBe(false);
     });
   });
 });

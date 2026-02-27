@@ -82,7 +82,7 @@ export class Provisioner {
   private async findExistingProject(name: string, workspaceId: string): Promise<string> {
     const gql = `
       query projects($workspaceId: String!) {
-        workspace(id: $workspaceId) {
+        workspace(workspaceId: $workspaceId) {
           projects {
             edges {
               node {

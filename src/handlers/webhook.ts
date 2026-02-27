@@ -42,7 +42,7 @@ export class WebhookHandler {
       const result = await this.provisioner.provision(
         payload.details.userId,
         payload.details.email,
-        payload.details.workspaceId,
+        payload.resource.workspace.id,
       );
       return Response.json({ status: "provisioned", ...result });
     } catch (err) {
@@ -80,10 +80,11 @@ export class WebhookHandler {
     if (typeof obj.type !== "string") return false;
     if (typeof obj.details !== "object" || obj.details === null) return false;
     const details = obj.details as Record<string, unknown>;
-    return (
-      typeof details.userId === "string" &&
-      typeof details.email === "string" &&
-      typeof details.workspaceId === "string"
-    );
+    if (typeof details.userId !== "string" || typeof details.email !== "string") return false;
+    if (typeof obj.resource !== "object" || obj.resource === null) return false;
+    const resource = obj.resource as Record<string, unknown>;
+    if (typeof resource.workspace !== "object" || resource.workspace === null) return false;
+    const workspace = resource.workspace as Record<string, unknown>;
+    return typeof workspace.id === "string";
   }
 }
