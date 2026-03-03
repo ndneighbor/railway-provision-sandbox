@@ -150,8 +150,7 @@ export class RailwayClient {
           id
           eventTypes
           channels {
-            type
-            webhookUrl
+            config
           }
         }
       }
@@ -175,13 +174,12 @@ export class RailwayClient {
           id
           eventTypes
           channels {
-            type
-            webhookUrl
+            config
           }
         }
       }
     `;
-    const channelConfig: Record<string, string> = { type: "webhook", webhookUrl };
+    const channelConfig: Record<string, string> = { type: "WEBHOOK", webhookUrl };
     if (webhookSecret) {
       channelConfig.webhookSecret = webhookSecret;
     }
@@ -189,7 +187,7 @@ export class RailwayClient {
       input: {
         workspaceId,
         eventTypes: ["WorkspaceMember.joined"],
-        channels: [channelConfig],
+        channelConfigs: [channelConfig],
       },
     });
   }

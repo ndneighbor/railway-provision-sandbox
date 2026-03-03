@@ -62,9 +62,7 @@ export class NotificationSetup {
       rules.find(
         (rule) =>
           rule.eventTypes.includes("WorkspaceMember.joined") &&
-          rule.channels.some(
-            (ch) => ch.type === "webhook" && ch.webhookUrl === webhookUrl,
-          ),
+          rule.channels.some((ch) => ch.config?.webhookUrl === webhookUrl),
       ) ?? null
     );
   }
