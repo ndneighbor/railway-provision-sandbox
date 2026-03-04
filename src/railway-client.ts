@@ -169,7 +169,7 @@ export class RailwayClient {
 
   async notificationRuleCreate(workspaceId: string, webhookUrl: string, webhookSecret?: string) {
     const gql = `
-      mutation notificationRuleCreate($input: NotificationRuleCreateInput!) {
+      mutation notificationRuleCreate($input: CreateNotificationRuleInput!) {
         notificationRuleCreate(input: $input) {
           id
           eventTypes
