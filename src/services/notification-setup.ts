@@ -20,14 +20,7 @@ export class NotificationSetup {
 
     const existing = await this.findExistingRule(webhookUrl);
 
-    if (existing && this.config.webhookSecret) {
-      // Can't verify if the existing rule has the right secret, so
-      // delete and recreate to ensure the secret is in sync.
-      this.logger.info("Recreating notification rule to sync webhook secret", {
-        ruleId: existing.id,
-      });
-      await this.client.notificationRuleDelete(existing.id);
-    } else if (existing) {
+    if (existing) {
       this.logger.info("Notification rule already exists", {
         ruleId: existing.id,
         webhookUrl,
